@@ -1,0 +1,62 @@
+
+  501  cd /Users/tschappe/Documents/Grad\ Classes/2016-1\ Winter/Comparative\ Genomics/hmmer 
+  502  /Applications/hmmer-3.1b2-macosx-intel/binaries/hmmpress /Users/tschappe/Documents/Grad\ Classes/2016-1\ Winter/Comparative\ Genomics/hmmer/NB-ARC.hmm 
+  503  hmmscan
+  504  hmmscan NB-ARC.hmm /Users/tschappe/Documents/Grad\ Classes/2016-1\ Winter/Comparative\ Genomics/hmmer/arth_pep 
+  505  hmmscan
+  506  hmmscan -h
+  507  hmmscan NB-ARC.hmm --domtblout arth_pep.table /Users/tschappe/Documents/Grad\ Classes/2016-1\ Winter/Comparative\ Genomics/hmmer/arth_pep 
+  508  hmmscan --domtblout arth_pep.table NB-ARC.hmm /Users/tschappe/Documents/Grad\ Classes/2016-1\ Winter/Comparative\ Genomics/hmmer/arth_pep 
+  509  hmmscan --tblout arth_pep.table NB-ARC.hmm /Users/tschappe/Documents/Grad\ Classes/2016-1\ Winter/Comparative\ Genomics/hmmer/arth_pep 
+  510  perl -pe 's/ +/\t/g' arth_pep.table
+  511  perl -pe 's/ +/\t/g' arth_pep.table > arth_pep.formatted.table
+  512  cut -f 3 arth_pep.formatted.table 
+  513  for i in $(cut -f 3 arth_pep.formatted.table); do echo $i; done
+  514  for i in $(cut -f 3 arth_pep.formatted.table); do grep $i arth_pep; done
+  515  for i in $(cut -f 3 arth_pep.formatted.table); do printf $i"\t"$(grep $i arth_pep); done
+  516* for i in $(cut -f 3 arth_pep.formatted.table)
+  517  for i in $(cut -f 3 arth_pep.formatted.table); do grep $i arth_pep; done
+  518  for i in $(cut -f 3 arth_pep.formatted.table); do printf $i"\t"(grep $i arth_pep); done
+  519  for i in $(cut -f 3 arth_pep.formatted.table); do printf $i | grep $i arth_pep; done
+  520  for i in $(cut -f 3 arth_pep.formatted.table); do printf $i | grep $i arth_pep; done > annotations.NB.table
+  521  pwd
+  522  perl -pe -i 's/ +/\t/g' annotations.NB.table 
+  523  perl -pei 's/ +/\t/g' annotations.NB.table 
+  524  for i in $(cut -f 3 arth_pep.formatted.table); do echo $i; done
+  525  for i in $(cut -f 3 arth_pep.formatted.table); do echo $i| grep "^A"; done
+  526  for i in $(cut -f 3 arth_pep.formatted.table); do echo $i| grep "^A"; done > names.step2.list
+  527  for i in $(cat names.step2.list); do printf $i"\tBALLSACK\n"; done
+  528  awk '!/^>/ { printf "%s", $0; n = "\n" } 
+/^>/ { print n $0; n = "" }
+END { printf "%s", n }` 
+  529  awk '!/^>/ { printf "%s", $0; n = "\n" } /^>/ { print n $0; n = "" } END { printf "%s", n }' arth_pep
+  530  awk '!/^>/ { printf "%s", $0; n = "\n" } /^>/ { print n $0; n = "" } END { printf "%s", n }' arth_pep > arth_pep.unwrap.fasta
+  531  for i in $(cat names.step2.list); do grep ^\
+  532  for i in $(cat names.step2.list); do grep *; 
+  533  for i in $(cat names.step2.list); do echi $i; done
+  534  for i in $(cat names.step2.list); do echo $i; done
+  535  for i in $(cat names.step2.list); do grep $i arth_pep.unwrap.fasta; done
+  536  for i in $(cat names.step2.list); do grep -A 1 $i arth_pep.unwrap.fasta; done
+  537  for i in $(cat names.step2.list); do grep -A 1 $i arth_pep.unwrap.fasta; done > nb_out.fasta
+  538  ls -lrt
+  539  hmmbuild /Users/tschappe/Documents/Grad\ Classes/2016-1\ Winter/Comparative\ Genomics/hmmer/LRR_1.hmm 
+  540  hmmbuild LRR.hmm /Users/tschappe/Documents/Grad\ Classes/2016-1\ Winter/Comparative\ Genomics/hmmer/LRR_1.hmm 
+  541  hmmscan
+  542  hmmbuild LRR.hmm
+  543  hmmbuild LRR.hmm LRR.hmm
+  544  hmmbuild LRR.hmm test
+  545  hmmbuild test LRR.hmm
+  546  hmmbuild test LRR_1.hmm
+  547  hmmbuild arth_pep LRR_1.hmm
+  548  hmmbuild LRR_1.hmm arth_pep
+  549* hmmpress TIR.hmm
+  550  hmmpress LRR_1.hmm
+  551  hmmscan LRR_1.hmm --tblout arth_lrr.table /Users/tschappe/Documents/Grad\ Classes/2016-1\ Winter/Comparative\ Genomics/hmmer/nb_out.fasta 
+  552  hmmscan LRR_1.hmm --tblout arth_lrr.table nb_out.fasta 
+  553  hmmscan --tblout arth_lrr.table LRR_1.hmm nb_out.fasta 
+  554  perl -pe 's/ +/\t/g' arth_lrr.table > arth_lrr.formatted.table
+  555  for i in $(cut -f 3 arth_lrr.formatted.table); do printf $i | grep $i arth_pep; done > annotations.lrr.table
+  556  for i in $(cut -f 3 arth_lrr.formatted.table); do echo $i| grep "^A"; done > names.step3.list
+  557  for i in $(cat names.step3.list); do grep -A 1 $i nb_out.fasta; done > lrr_out.fasta
+  558  history
+  559  history > commands.txt

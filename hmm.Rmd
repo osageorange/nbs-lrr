@@ -1,0 +1,296 @@
+---
+title: "Comparative genomics HW"
+output: html_document
+---
+
+
+# Step 2B: Annotations
+
+```{r}
+library(seqinr)
+library(ggplot2)
+ann.step2 <- read.table("/Users/tschappe/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/hmmer/annotations.NB.table", sep = "|", fill = T)
+nrow(ann.step2)
+pie(table(ann.step2$V3))
+
+nbs <- read.table("/Users/tschappe/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/hmmer/arth_pep.formatted.table", sep = "\t", fill = T)
+nbs.filter <- nbs[nbs$V5 < 0.001 ,]
+nrow(nbs.filter)
+
+names.genes <- gsub(gsub(ann.step2$V1, pattern = ">", replacement = ""), pattern = " ", replacement = "")
+ann.step2.filter <- ann.step2[names.genes2 %in% lrr.filter$V3, ]
+ann.step2.filter$resistance <- factor(grepl('resistance', ann.step2.filter$V3))
+length(ann.step2.filter$resistance[ann.step2.filter$resistance == "TRUE"])
+length(ann.step2.filter$resistance[ann.step2.filter$resistance == "FALSE"])
+( arth.nbs.pie <- ggplot(ann.step2.filter, aes(x = factor(1), fill = factor(resistance))) +
+  geom_bar(width = 1)+
+  coord_polar(theta = "y")+
+  theme_bw()+
+  scale_fill_discrete(name="Genes with \n'resistance' in \nGO term",
+                          breaks=c("TRUE", "FALSE"),
+                          labels=c("123", "57"))+
+  ylab("")+
+  xlab("")+
+  theme(axis.ticks = element_blank(),
+             axis.text.y = element_blank(),
+             axis.text.x = element_blank())
+  )
+
+```
+
+# Step 2c: Extracting the HMM hits
+
+```{r}
+all.fasta <- read.fasta("/Users/tschappe/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/hmmer/arth_pep")
+names(all.fasta[1])
+
+nb.fasta <- all.fasta[names(all.fasta) %in% names.genes]
+#write.fasta(nb.fasta, file.out = "nb_out.R.fasta")
+```
+
+# Step 3: Run LRR HMM on output and import the formatted table
+```{r}
+ann.step3 <- read.table("/Users/tschappe/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/hmmer/annotations.lrr.table", sep = "|", fill = T)
+nrow(ann.step3)
+pie(table(ann.step3$V3))
+
+lrr <- read.table("/Users/tschappe/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/hmmer/arth_lrr.formatted.table", sep = "\t", fill = T)
+lrr.filter <- lrr[lrr$V5 < 0.01 ,]
+nrow(lrr.filter)
+
+
+
+names.genes2 <- gsub(gsub(ann.step3$V1, pattern = ">", replacement = ""), pattern = " ", replacement = "")
+
+ann.step3.filter <- ann.step3[names.genes2 %in% lrr.filter$V3, ]
+pie(table(ann.step3.filter$V3))
+ann.step3.filter$resistance <- factor(grepl('resistance', ann.step3.filter$V3))
+length(ann.step3.filter$resistance[ann.step3.filter$resistance == "TRUE"])
+str(ann.step3.filter)
+#Create pie chart
+( arth.lrr.pie <- ggplot(ann.step3.filter, aes(x = factor(1), fill = factor(resistance))) +
+  geom_bar(width = 1)+
+  coord_polar(theta = "y")+
+  theme_bw()+
+  scale_fill_discrete(name="Genes with \n'resistance' in \nGO term",
+                          breaks=c("TRUE", "FALSE"),
+                          labels=c("85", "13"))+
+  ylab("")+
+  xlab("")+
+  theme(axis.ticks = element_blank(),
+             axis.text.y = element_blank(),
+             axis.text.x = element_blank())
+  )
+#Clean up annotations for a word cloud
+arth.lrr.cloud <- ann.step3.filter$V3
+write.table(arth.lrr.cloud, "arth.lrr.cloud.csv", sep=",")
+```
+
+# Step 4: Run TIR HMM on output and import the formatted table
+
+
+
+
+###Douglas-fir
+
+```{r}
+library(seqinr)
+
+###NBS###
+df.nb <- read.table("/Users/tschappe/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/df_hmmer/psme_pep.formatted.table", sep = "\t", fill = T)
+#Filter formatted hits table
+df.nb.filter <- df.nb[df.nb$V5 < 0.01 ,]
+nrow(df.nb.filter)
+#Get annotations from annotated fasta
+df.nb.fasta <- read.fasta("/Users/tschappe/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/df_hmmer/annotations/blast2go_fasta_nbs_out.fasta")
+#Put names and annotations from fasta into data frame
+df.nb.annots <- data.frame(cbind(names(df.nb.fasta), getAnnot(df.nb.fasta)))
+#Grep for the word 'resistance' in the annotations
+df.nb.annots$resistance <- factor(grepl('resistance', df.nb.annots$X2))
+#Remove the stuff after the |m.23423| in the annotations
+df.nb.annots$X1 <- gsub('\\|[A-Z]+.*', '', df.nb.annots$X1)
+#Turn '=' into '_' in the filtered names
+df.nb.filter$V3 <- gsub('\\=', '_', df.nb.filter$V3)
+#Find the names of the filtered genes in the annotations data frame and filter
+df.nb.names <- df.nb.annots[df.nb.annots$X1 %in% as.character(df.nb.filter$V3), ]
+length(df.nb.names$resistance[df.nb.names$resistance == "TRUE"])
+#Create pie chart
+( psme.nb.pie <- ggplot(df.nb.names, aes(x = factor(1), fill = factor(resistance))) +
+  geom_bar(width = 1)+
+  coord_polar(theta = "y")+
+  theme_bw()+
+  scale_fill_discrete(name="Genes with \n'resistance' in \nGO term",
+                          breaks=c("TRUE", "FALSE"),
+                          labels=c("263", "64"))+
+  ylab("")+
+  xlab("")+
+  theme(axis.ticks = element_blank(),
+             axis.text.y = element_blank(),
+             axis.text.x = element_blank())
+  )
+
+
+###LRR###
+#Get formatted hits table
+df.lrr <- read.table("/Users/tschappe/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/df_hmmer/psme_lrr.formatted.table", sep = "\t", fill = T)
+#Filter formatted hits table
+df.lrr.filter <- df.lrr[df.lrr$V5 < 0.01 ,]
+nrow(df.lrr.filter)
+#Get annotations from annotated fasta
+df.lrr.fasta <- read.fasta("/Users/tschappe/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/df_hmmer/annotations/blast2go_fasta_lrr_out.fasta")
+#Put names and annotations from fasta into data frame
+df.lrr.annots <- data.frame(cbind(names(df.lrr.fasta), getAnnot(df.lrr.fasta)))
+#Grep for the word 'resistance' in the annotations
+df.lrr.annots$resistance <- factor(grepl('resistance', df.lrr.annots$X2))
+#Remove the stuff after the |m.23423| in the annotations
+df.lrr.annots$X1 <- gsub('\\|[A-Z]+.*', '', df.lrr.annots$X1)
+#Turn '=' into '_' in the filtered names
+df.lrr.filter$V3 <- gsub('\\=', '_', df.lrr.filter$V3)
+#Find the names of the filtered genes in the annotations data frame and filter
+df.lrr.names <- df.lrr.annots[df.lrr.annots$X1 %in% as.character(df.lrr.filter$V3), ]
+#Find how many there are with 'resistance' in the annotation
+length(df.lrr.names$resistance[df.lrr.names$resistance == "TRUE"])
+#Create pie chart
+( psme.lrr.pie <- ggplot(df.lrr.names, aes(x = factor(1), fill = factor(resistance))) +
+  geom_bar(width = 1)+
+  coord_polar(theta = "y")+
+  theme_bw()+
+  scale_fill_discrete(name="Genes with \n'resistance' in \nGO term",
+                          breaks=c("TRUE", "FALSE"),
+                          labels=c("26", "0"))+
+  ylab("")+
+  xlab("")+
+  theme(axis.ticks = element_blank(),
+             axis.text.y = element_blank(),
+             axis.text.x = element_blank())
+  )
+
+#Clean up annotations for a word cloud
+df.lrr.cloud <- gsub('.*Full\\=\\s', '', df.lrr.names$X2)
+df.lrr.cloud <- gsub('.*Full\\=', '', df.lrr.names$X2)
+write.table(df.lrr.cloud, "df.lrr.cloud.csv", sep=",")
+```
+
+###Pinus taeda
+
+```{r}
+###NBS###
+pt.nb <- read.table("/Users/tschappe/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/tp_hmmer/pita_nb.formatted.table", sep = "\t", fill = T)
+#Filter formatted hits table
+pt.nb.filter <- pt.nb[pt.nb$V5 < 0.01 ,]
+nrow(pt.nb.filter)
+#Get annotations from annotated fasta
+pt.nb.fasta <- read.fasta("/Users/tschappe/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/tp_hmmer/psme2_nbout.annot.fasta")
+#Put names and annotations from fasta into data frame
+pt.nb.annots <- data.frame(cbind(names(pt.nb.fasta), getAnnot(pt.nb.fasta)))
+#Grep for the word 'resistance' in the annotations
+pt.nb.annots$resistance <- factor(grepl('resistance', pt.nb.annots$X2))
+#Remove the stuff after the |m.23423| in the annotations
+pt.nb.annots$X1 <- gsub('\\|[A-Z]+.*', '', pt.nb.annots$X1)
+#Turn '=' into '_' in the filtered names
+pt.nb.filter$V3 <- gsub('\\=', '_', pt.nb.filter$V3)
+#Find the names of the filtered genes in the annotations data frame and filter
+pt.nb.names <- pt.nb.annots[pt.nb.annots$X1 %in% as.character(pt.nb.filter$V3), ]
+#Find how many there are with 'resistance' in the annotation
+length(pt.nb.names$resistance[pt.nb.names$resistance == "TRUE"])
+#Make a pie graph
+( pt.nb.pie <- ggplot(pt.nb.names, aes(x = factor(1), fill = factor(resistance))) +
+  geom_bar(width = 1)+
+  coord_polar(theta = "y")+
+  theme_bw()+
+  scale_fill_discrete(name="Genes with \n'resistance' in \nGO term",
+                          breaks=c("TRUE", "FALSE"),
+                          labels=c("733", "39"))+
+  ylab("")+
+  xlab("")+
+  theme(axis.ticks = element_blank(),
+             axis.text.y = element_blank(),
+             axis.text.x = element_blank())
+  )
+
+
+###LRR###
+pt.lrr <- read.table("/Users/tschappe/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/tp_hmmer/pita_lrr.formatted.table", sep = "\t", fill = T)
+#Filter formatted hits table
+pt.lrr.filter <- pt.lrr[pt.lrr$V5 < 0.01 ,]
+nrow(pt.lrr.filter)
+#Get annotations from annotated fasta
+pt.lrr.fasta <- read.fasta("/Users/tschappe/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/tp_hmmer/pt_lrr_out.annot.fasta")
+#Put names and annotations from fasta into data frame
+pt.lrr.annots <- data.frame(cbind(names(pt.lrr.fasta), getAnnot(pt.lrr.fasta)))
+#Grep for the word 'resistance' in the annotations
+pt.lrr.annots$resistance <- factor(grepl('resistance', pt.lrr.annots$X2))
+#Remove the stuff after the |m.23423| in the annotations
+pt.lrr.annots$X1 <- gsub('\\|[A-Z]+.*', '', pt.lrr.annots$X1)
+#Turn '=' into '_' in the filtered names
+pt.lrr.filter$V3 <- gsub('\\=', '_', pt.lrr.filter$V3)
+#Find the names of the filtered genes in the annotations data frame and filter
+pt.lrr.names <- pt.lrr.annots[pt.lrr.annots$X1 %in% as.character(pt.lrr.filter$V3), ]
+#Find how many there are with 'resistance' in the annotation
+length(pt.lrr.names$resistance[pt.lrr.names$resistance == "TRUE"])
+#Make a pie graph
+( pt.lrr.pie <- ggplot(pt.lrr.names, aes(x = factor(1), fill = factor(resistance))) +
+  geom_bar(width = 1)+
+  coord_polar(theta = "y")+
+  theme_bw()+
+  scale_fill_discrete(name="Genes with \n'resistance' in \nGO term",
+                          breaks=c("TRUE", "FALSE"),
+                          labels=c("307", "3"))+
+  ylab("")+
+  xlab("")+
+  theme(axis.ticks = element_blank(),
+             axis.text.y = element_blank(),
+             axis.text.x = element_blank())
+  )
+#Clean up annotations for a word cloud
+pt.lrr.cloud <- gsub('.*Full\\=\\s', '', pt.lrr.names$X2)
+pt.lrr.cloud <- gsub('.*Full\\=', '', pt.lrr.names$X2)
+pt.lrr.cloud <- gsub('\\"[0-9]+\\"\\,\\"', '', pt.lrr.cloud)
+write.table(pt.lrr.cloud, "~/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/tp_hmmer/pt.lrr.cloud.csv", sep=",")
+```
+
+
+
+###Douglas-fir from Cronn lab###
+
+```{r}
+###LRR###
+df2.lrr <- read.table("/Users/tschappe/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/df_hmmer2/psme2_lrr.formatted.table", sep = "\t", fill = T)
+#Filter formatted hits table
+df2.lrr.filter <- df2.lrr[df2.lrr$V5 < 0.01 ,]
+nrow(df2.lrr.filter)
+#Get annotations from annotated fasta
+df2.lrr.fasta <- read.fasta("/Users/tschappe/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/df_hmmer2/df2_lrr.out_annot.fasta")
+#Put names and annotations from fasta into data frame
+df2.lrr.annots <- data.frame(cbind(names(df2.lrr.fasta), getAnnot(df2.lrr.fasta)))
+#Grep for the word 'resistance' in the annotations
+df2.lrr.annots$resistance <- factor(grepl('resistance', df2.lrr.annots$X2))
+#Remove the stuff after the |m.23423| in the annotations
+df2.lrr.annots$X1 <- gsub('\\|[A-Z]+.*', '', df2.lrr.annots$X1)
+#Turn '=' into '_' in the filtered names
+df2.lrr.filter$V3 <- gsub('\\=', '_', df2.lrr.filter$V3)
+#Find the names of the filtered genes in the annotations data frame and filter
+df2.lrr.names <- df2.lrr.annots[df2.lrr.annots$X1 %in% as.character(df2.lrr.filter$V3), ]
+#Find how many there are with 'resistance' in the annotation
+length(df2.lrr.names$resistance[df2.lrr.names$resistance == "TRUE"])
+verified <- df2.lrr.names[df2.lrr.names$resistance == "TRUE" ,]
+write.table(verified$X1, "verified.csv", sep="\t")
+#Make a pie graph
+( df2.lrr.pie <- ggplot(df2.lrr.names, aes(x = factor(1), fill = factor(resistance))) +
+  geom_bar(width = 1)+
+  coord_polar(theta = "y")+
+  theme_bw()+
+  scale_fill_discrete(name="Genes with \n'resistance' in \nGO term",
+                          breaks=c("TRUE", "FALSE"),
+                          labels=c("307", "3"))+
+  ylab("")+
+  xlab("")+
+  theme(axis.ticks = element_blank(),
+             axis.text.y = element_blank(),
+             axis.text.x = element_blank())
+  )
+#Clean up annotations for a word cloud
+df2.lrr.cloud <- gsub('.*Full\\=\\s', '', df2.lrr.names$X2)
+df2.lrr.cloud <- gsub('.*Full\\=', '', df2.lrr.names$X2)
+df2.lrr.cloud <- gsub('\\"[0-9]+\\"\\,\\"', '', df2.lrr.cloud)
+write.table(df2.lrr.cloud, "~/Documents/Grad Classes/2016-1 Winter/Comparative Genomics/df_hmmer2/df2.lrr.cloud.csv", sep=",")
